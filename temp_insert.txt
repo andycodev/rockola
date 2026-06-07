@@ -1,0 +1,68 @@
+<!-- MATERIALES DEL PEDIDO EN MODO EDICIÓN -->
+                  <div v-if="editMode" class="mt-6">
+                    <div class="divider divider-neutral">Editar Materiales del Pedido</div>
+                    <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2 -mr-2">
+                      <div v-for="item in materiales" :key="item.id_material"
+                        class="card transition-all duration-200 border" :class="{
+                          'bg-green-50 border-green-200': item.cantidad > 0,
+                          'bg-base-100 border-base-200': item.cantidad === 0
+                        }">
+                        <div
+                          class="card-body p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <!-- Info -->
+                          <div class="flex-1">
+                            <div class="flex items-start justify-between">
+                              <h2 class="font-semibold text-lg">{{ item.nombre }}</h2>
+                              <span class="text-sm font-medium text-green-600"
+                                v-if="item.cantidad > 0">
+                                {{ item.cantidad }} x S/. {{ item.precio }}
+                              </span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">{{ item.descripcion }}
+                            </p>
+                            <p class="font-bold text-primary mt-1">S/. {{ (item.precio *
+                              item.cantidad).toFixed(2) }}</p>
+                          </div>
+
+                          <!-- Controls -->
+                          <div class="flex items-center gap-2">
+                            <button
+                              class="btn btn-sm btn-ghost border border-gray-300 hover:bg-gray-100"
+                              @click="decrementar(item)"
+                              :disabled="item.cantidad === 0">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="2" d="M20 12H4" />
+                              </svg>
+                            </button>
+
+                            <input type="number"
+                              class="input input-sm input-bordered w-16 text-center"
+                              v-model.number="item.cantidad" min="0"
+                              @input="handleQuantityInput($event, item)" />
+
+                            <button class="btn btn-sm btn-primary"
+                              @click="incrementar(item)">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="2" d="M12 4v16m8-8H4" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Resumen en modo edición -->
+                    <div class="mt-4 p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                      <p class="text-sm text-gray-600">
+                        <strong>Total de materiales:</strong> {{ totalItems }}
+                      </p>
+                      <p class="text-sm text-gray-600">
+                        <strong>Monto total:</strong> S/. {{ totalPrecio.toFixed(2) }}
+                      </p>
+                    </div>
+                  </div>
