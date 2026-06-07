@@ -11,12 +11,13 @@
                 <input v-model="query" @keyup.enter="buscarYoutube" placeholder="Busca tu canción..."
                     :disabled="cancionesPropiasActivas.length >= 2" />
                 <button @click="buscarYoutube" :disabled="cargando || cancionesPropiasActivas.length >= 2">
-                    <span v-if="!cargando">🔍</span>
+                    <MagnifyingGlassIcon v-if="!cargando" class="w-5 h-5 mx-auto" />
                     <span v-else class="loader"></span>
                 </button>
             </div>
             <p v-if="cancionesPropiasActivas.length >= 2" class="limit-msg">
-                ⚠️ Límite alcanzado (2 temas). Espera a que terminen.
+                <ExclamationTriangleIcon class="w-4 h-4 inline-block mr-1" /> Límite alcanzado (2 temas). Espera a que
+                terminen.
             </p>
         </section>
 
@@ -38,14 +39,17 @@
 
             <button v-if="esResultadosLocales && cancionesPropiasActivas.length < 2" @click="buscarEnYoutubeAPI"
                 class="btn-youtube-search">
-                ¿No es lo que buscas? Buscar en YouTube 📺
+                ¿No está en la lista? Buscar en YouTube
+                <TvIcon class="w-5 h-5 inline-block ml-1" />
             </button>
         </div>
 
         <!-- Fila de Reproducción Global -->
-        <section class="queue-section">
-            <h3 class="section-title">En Cola</h3>
-            <div class="lista-cola">
+        <section class="queue-section mt-6">
+            <h3 class="section-title flex items-center gap-2 mb-4">
+                <MusicalNoteIcon class="w-4 h-4" /> En Cola
+            </h3>
+            <div class="lista-cola scroll-mini-cliente">
                 <div v-for="(cancion, index) in cola" :key="cancion.id" class="item-cancion"
                     :class="{ 'es-mia': cancion.mesa_id === mesaId, 'playing': cancion.estado === 'reproduciendo' }">
                     <span class="index">#{{ index + 1 }}</span>
@@ -53,7 +57,9 @@
                     <div class="info">
                         <p class="titulo-c">{{ cancion.titulo }}</p>
                         <div class="badges">
-                            <span class="tag-own" v-if="cancion.mesa_id === mesaId">★ MI MESA</span>
+                            <span class="tag-own" v-if="cancion.mesa_id === mesaId">
+                                <StarIcon class="w-2 h-2 inline-block mr-1" /> MI MESA
+                            </span>
                             <span class="status-badge" :class="cancion.estado">
                                 {{ cancion.estado === 'reproduciendo' ? 'SONANDO AHORA' : 'EN COLA' }}
                             </span>
@@ -62,7 +68,7 @@
                     <!-- Botón para eliminar pedido propio si no está sonando -->
                     <button v-if="cancion.mesa_id === mesaId && cancion.estado !== 'reproduciendo'"
                         @click="eliminarPedido(cancion.id)" class="btn-delete-mia" title="Eliminar mi pedido">
-                        ✕
+                        <XMarkIcon class="w-5 h-5 mx-auto" />
                     </button>
                 </div>
                 <div v-if="cola.length === 0" class="empty-msg">No hay canciones en cola</div>
@@ -71,13 +77,18 @@
 
         <!-- Historial Personal de esta Mesa -->
         <section class="history-section" v-if="historial.length">
-            <h3 class="section-title">Tu Historial</h3>
-            <div class="lista-historial">
+            <h3 class="section-title flex items-center gap-2">
+                <ArrowPathIcon class="w-4 h-4" /> Tu Historial
+            </h3>
+            <div class="lista-historial scroll-mini">
                 <div v-for="h in historial" :key="h.id" class="item-historial" @click="repedirCancion(h)">
                     <img :src="h.miniatura" />
                     <div class="h-info">
                         <p>{{ h.titulo }}</p>
-                        <span>Pedir de nuevo ↩️</span>
+                        <span>
+                            Pedir de nuevo
+                            <ArrowUturnLeftIcon class="w-3 h-3 inline-block ml-1" />
+                        </span>
                     </div>
                 </div>
             </div>
@@ -87,8 +98,10 @@
     <!-- Modal / Pantalla de Ingreso de PIN -->
     <div v-else-if="mostarLoginPin" class="error-pantalla">
         <div class="error-card">
-            <div class="mesa-badge mb-4">Mesa {{ mesaNombre }}</div>
-            <h2 class="text-white">🔐 Código de Acceso</h2>
+            <div class="mesa-badge mb-4">
+                <LockClosedIcon class="w-3 h-3 inline-block mr-1" /> Mesa {{ mesaNombre }}
+            </div>
+            <h2 class="text-white">Código de Acceso</h2>
             <p class="text-slate-400 text-sm mb-6">Ingresa el código de 3 dígitos que aparece en tu mesa.</p>
 
             <input v-model="pinIngresado" type="tel" maxlength="3" placeholder="000" class="pin-input"
@@ -100,7 +113,10 @@
 
     <div v-else class="error-pantalla">
         <div class="error-card">
-            <h2>⚠️ Acceso no válido</h2>
+            <h2>
+                <ExclamationTriangleIcon class="w-10 h-10 text-red-500 mx-auto mb-2" />
+                Acceso no válido
+            </h2>
             <p>{{ errorSesion }}</p>
             <button @click="reintentar">Intentar de nuevo</button>
         </div>
@@ -112,6 +128,15 @@ import { useRoute } from 'vue-router'
 import { supabase } from '../lib/supabaseClient'
 import type { Cancion, VideoBusqueda, SesionLocal } from '../types/rockola'
 import { showNotification } from '@/events/notificationEvents'
+import {
+    MagnifyingGlassIcon,
+    ExclamationTriangleIcon,
+    TvIcon,
+    XMarkIcon,
+    ArrowUturnLeftIcon,
+    LockClosedIcon,
+    StarIcon
+} from '@heroicons/vue/24/solid'
 
 const route = useRoute()
 const mesaId = route.params.id as string
@@ -277,9 +302,9 @@ const buscarYoutube = async () => {
 
         if (locales && locales.length > 0) {
             const uniqueMap = new Map()
-            locales.forEach(l => uniqueMap.set(l.youtube_video_id, l))
+            locales.forEach((l: any) => uniqueMap.set(l.youtube_video_id, l))
 
-            resultados.value = Array.from(uniqueMap.values()).map(l => ({
+            resultados.value = Array.from(uniqueMap.values()).map((l: any) => ({
                 videoId: l.youtube_video_id,
                 title: l.titulo,
                 thumbnail: l.miniatura
@@ -329,6 +354,12 @@ onMounted(async () => {
 onUnmounted(() => { if (realtimeChannel) supabase.removeChannel(realtimeChannel) })
 </script>
 <style scoped>
+.scroll-mini {
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
 .container-client {
     background: #0f172a;
     color: #f8fafc;

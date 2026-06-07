@@ -1,128 +1,221 @@
 <template>
     <div class="admin-panel">
-        <header class="admin-header">
-            <h1 class="logo-text">⚙️ PANEL <span>ADMIN</span></h1>
-            <button class="btn-refresh" @click="cargarDatosAdmin">🔄</button>
-        </header>
-
-        <!-- Navegación por Pestañas (Sticky) -->
-        <nav class="admin-tabs">
-            <button :class="{ active: tabActiva === 'musica' }" @click="tabActiva = 'musica'">
-                🎵 Música <span v-if="canciones.length" class="dot-count">{{ canciones.length }}</span>
-            </button>
-            <button :class="{ active: tabActiva === 'mesas' }" @click="tabActiva = 'mesas'">
-                🏠 Mesas
-            </button>
-        </nav>
-
-        <main class="admin-content">
-            <!-- TAB: GESTIÓN DE MÚSICA -->
-            <section v-show="tabActiva === 'musica'" class="tab-section animate-in">
-                <!-- Monitor en Vivo (Sincronizado) -->
-                <div class="monitor-card">
-                    <h2 class="section-title">📺 Monitor en Vivo</h2>
-                    <div class="monitor-container" :class="{ 'is-empty': !cancionSonando }">
-                        <div class="player-wrapper">
-                            <div id="admin-player"></div>
-                            <div v-if="!cancionSonando" class="player-placeholder">
-                                <span>Sincronizando con TV...</span>
-                            </div>
-                        </div>
-                        <div class="monitor-info" v-if="cancionSonando">
-                            <div class="playing-tag">EN VIVO</div>
-                            <h3 class="truncate-text">{{ cancionSonando.titulo }}</h3>
-                            <p class="mesa-name">Mesa: {{ obtenerNombreMesa(cancionSonando.mesa_id) }}</p>
-                            <button class="btn-skip-monitor" @click="saltarTemaActual">
-                                Saltar Tema ⏭️
-                            </button>
-                        </div>
-                        <div class="monitor-info" v-else>
-                            <p class="no-play-msg">No hay música sonando ahora.</p>
-                        </div>
-                    </div>
+        <div class="admin-panel h-screen flex flex-col overflow-hidden">
+            <!-- Cabecera Fija -->
+            <header class="admin-header shrink-0">
+                <div class="flex justify-between items-center px-5 py-3 bg-[#111827] border-b border-[#1e293b]">
+                    <h1 class="logo-text flex items-center gap-2 text-lg font-black tracking-tight">
+                        <Cog6ToothIcon class="w-6 h-6 text-blue-500" />
+                        PANEL <span class="text-blue-500">ADMIN</span>
+                    </h1>
+                    <button class="btn-refresh p-2 rounded-lg bg-[#1e293b] active:scale-95 transition-transform"
+                        @click="cargarDatosAdmin" :disabled="cargando">
+                        <ArrowPathIcon class="w-5 h-5 text-slate-400" :class="{ 'animate-spin': cargando }" />
+                    </button>
                 </div>
+            </header>
 
-                <div class="seccion-listas">
-                    <h2 class="section-title">Cola de Reproducción</h2>
-                    <div v-if="canciones.length === 0" class="empty-msg">No hay canciones en espera.</div>
-                    <div v-for="item in canciones" :key="item.id" class="item-cancion" :class="item.estado">
-                        <img :src="item.miniatura" />
-                        <div class="detalles">
-                            <h4 class="truncate-text">{{ item.titulo }}</h4>
-                            <p class="meta">
-                                <span :class="['badge-status', item.estado]">
-                                    {{ item.estado === 'reproduciendo' ? 'SONANDO' : 'EN COLA' }}
-                                </span>
-                                <strong>{{ obtenerNombreMesa(item.mesa_id) }}</strong>
-                            </p>
-                        </div>
-                        <button v-if="item.estado !== 'reproduciendo'" class="btn-delete"
-                            @click="quitarCancion(item.id)">
-                            ✕
-                        </button>
-                    </div>
+            <!-- Navegación Principal -->
+            <nav class="admin-tabs shrink-0 flex bg-[#111827] border-b border-[#1e293b]">
+                <button :class="{ active: tabActiva === 'musica' }" @click="tabActiva = 'musica'">
+                    <MusicalNoteIcon class="w-5 h-5" />
+                    <span>Música</span>
+                    <span v-if="colaPendiente.length" class="dot-count">{{ colaPendiente.length }}</span>
+                </button>
+                <button :class="{ active: tabActiva === 'mesas' }" @click="tabActiva = 'mesas'">
+                    <TableCellsIcon class="w-5 h-5" />
+                    <span>Mesas</span>
+                </button>
+            </nav>
 
-                    <h2 class="section-title mt-8">Historial Reciente</h2>
-                    <div v-for="item in historialAdmin" :key="item.id" class="item-cancion historial">
-                        <img :src="item.miniatura" class="grayscale opacity-50" />
-                        <div class="detalles">
-                            <h4 class="text-slate-400 truncate-text">{{ item.titulo }}</h4>
-                            <p class="meta">
-                                <span class="badge-status completada">{{ item.estado.toUpperCase() }}</span>
-                                {{ obtenerNombreMesa(item.mesa_id) }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB: ESTRUCTURA DE MESAS -->
-            <section v-show="tabActiva === 'mesas'" class="tab-section animate-in">
-                <div class="seccion-mesas">
-                    <h2 class="section-title">Crear Mesa</h2>
-                    <div class="crear-mesa-box">
-                        <input v-model="nuevaMesaNombre" placeholder="Ej: Mesa 05" @keyup.enter="crearMesa" />
-                        <button @click="crearMesa" :disabled="!nuevaMesaNombre.trim()">+</button>
-                    </div>
-
-                    <div class="mesas-grid">
-                        <div v-for="mesa in mesas" :key="mesa.id" class="card-mesa">
-                            <div class="mesa-header">
-                                <h3 class="text-orange-500 font-black">{{ mesa.numero_mesa }}</h3>
-                                <div class="pin-box">
-                                    <span class="pin-masked">
-                                        PIN: <span class="pin-value">{{ mesa.pin }}</span>
-                                    </span>
-                                    <button @click="regenerarPin(mesa)" class="btn-mini-pin">🔄</button>
+            <main class="admin-content flex-1 overflow-y-auto bg-[#0a0f1e] p-4">
+                <!-- TAB: GESTIÓN DE MÚSICA -->
+                <section v-show="tabActiva === 'musica'" class="animate-in space-y-4">
+                    <!-- Monitor en Vivo (Sincronizado) -->
+                    <div class="monitor-card bg-black rounded-2xl p-3 border border-[#1e293b]">
+                        <div class="monitor-container grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4">
+                            <div
+                                class="player-wrapper relative aspect-video bg-[#111] rounded-xl overflow-hidden border border-white/5">
+                                <div id="admin-player" class="w-full h-full"></div>
+                                <div v-if="!cancionSonando"
+                                    class="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
+                                    <TvIcon class="w-8 h-8 text-slate-800 animate-pulse" />
                                 </div>
                             </div>
-                            <div class="qr-container">
-                                <qrcode-vue :value="obtenerUrlQR(mesa.id)" :size="110" level="H" background="#ffffff" />
+                            <div class="monitor-info flex flex-col justify-center" v-if="cancionSonando">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span
+                                        class="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider animate-pulse">En
+                                        Vivo</span>
+                                    <span class="text-blue-400 text-xs font-bold flex items-center gap-1">
+                                        <TableCellsIcon class="w-3 h-3" /> {{ obtenerNombreMesa(cancionSonando.mesa_id)
+                                        }}
+                                    </span>
+                                </div>
+                                <h3 class="text-white font-bold text-sm leading-tight line-clamp-2 mb-3">{{
+                                    cancionSonando.titulo }}</h3>
+                                <button
+                                    class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-95"
+                                    @click="saltarTemaActual">
+                                    Saltar Tema
+                                    <ForwardIcon class="w-4 h-4" />
+                                </button>
                             </div>
-                            <button class="btn-clear" @click="limpiarMesa(mesa)">Limpiar Sesión</button>
+                            <div v-else class="flex items-center text-slate-500 text-xs italic py-4">
+                                Sincronizando con la TV del bar...
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
-        </main>
+
+                    <!-- Sub-Tabs para Música -->
+                    <div
+                        class="seccion-listas-pwa bg-[#111827] rounded-2xl border border-[#1e293b] overflow-hidden flex flex-col">
+                        <div class="sub-tabs flex p-1 bg-black/40 gap-1 border-b border-[#1e293b]">
+                            <button
+                                class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all"
+                                :class="subTabMusica === 'cola' ? 'bg-[#1e293b] text-blue-400 shadow-lg' : 'text-slate-500'"
+                                @click="subTabMusica = 'cola'">
+                                <ListBulletIcon class="w-4 h-4" /> COLA
+                            </button>
+                            <button
+                                class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all"
+                                :class="subTabMusica === 'historial' ? 'bg-[#1e293b] text-blue-400 shadow-lg' : 'text-slate-500'"
+                                @click="subTabMusica = 'historial'">
+                                <ClockIcon class="w-4 h-4" /> HISTORIAL
+                            </button>
+                        </div>
+
+                        <div class="scroll-container-admin p-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+                            <!-- Sub-TAB: COLA -->
+                            <div v-if="subTabMusica === 'cola'" class="animate-in">
+                                <div v-if="colaPendiente.length === 0"
+                                    class="py-10 text-center text-slate-600 text-xs font-bold uppercase tracking-widest">
+                                    Cola vacía
+                                </div>
+                                <div v-for="item in colaPendiente" :key="item.id" class="item-cancion"
+                                    :class="item.estado">
+                                    <div
+                                        class="flex items-center gap-3 p-2 bg-[#0a0f1e] rounded-xl border border-[#1e293b] mb-2 group">
+                                        <img :src="item.miniatura" class="w-12 h-12 object-cover rounded-lg shrink-0" />
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="text-white text-xs font-bold truncate">{{ item.titulo }}</h4>
+                                            <p class="text-[#64748b] text-[10px] font-black uppercase">{{
+                                                obtenerNombreMesa(item.mesa_id) }}</p>
+                                        </div>
+                                        <button class="p-2 text-slate-500 hover:text-red-500 transition-colors"
+                                            @click="quitarCancion(item.id)">
+                                            <XMarkIcon class="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-TAB: HISTORIAL -->
+                            <div v-if="subTabMusica === 'historial'" class="animate-in">
+                                <div v-for="item in historialAdmin" :key="item.id"
+                                    class="flex items-center gap-3 p-2 opacity-60 mb-2">
+                                    <img :src="item.miniatura"
+                                        class="w-10 h-10 object-cover rounded-lg grayscale shrink-0" />
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-slate-400 text-xs truncate">{{ item.titulo }}</h4>
+                                        <p class="text-slate-600 text-[9px] uppercase">{{
+                                            obtenerNombreMesa(item.mesa_id) }}</p>
+                                    </div>
+                                    <span
+                                        class="text-[9px] font-black px-1.5 py-0.5 rounded border border-slate-700 text-slate-500 uppercase">
+                                        {{ item.estado === 'completada' ? 'OK' : 'SALT' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: ESTRUCTURA DE MESAS -->
+                <section v-show="tabActiva === 'mesas'" class="animate-in space-y-6">
+                    <div class="seccion-mesas">
+                        <h2
+                            class="section-title flex items-center gap-2 mb-4 text-xs font-black text-slate-500 tracking-widest uppercase">
+                            <PlusIcon class="w-4 h-4" /> Agregar Nueva Mesa
+                        </h2>
+                        <div class="crear-mesa-box flex gap-2">
+                            <input v-model="nuevaMesaNombre"
+                                class="flex-1 bg-[#111827] border border-[#1e293b] rounded-xl px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500/20"
+                                placeholder="Ej: Mesa 05" @keyup.enter="crearMesa" />
+                            <button class="bg-blue-600 text-white px-5 rounded-xl active:scale-95 transition-transform"
+                                @click="crearMesa" :disabled="!nuevaMesaNombre.trim()">
+                                <PlusIcon class="w-6 h-6 stroke-[3]" />
+                            </button>
+                        </div>
+
+                        <div class="mesas-grid grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div v-for="mesa in mesas" :key="mesa.id"
+                                class="card-mesa bg-[#111827] border border-[#1e293b] p-3 rounded-2xl flex flex-col items-center">
+                                <div class="w-full flex justify-between items-start mb-2">
+                                    <h3 class="text-blue-500 font-black text-sm uppercase italic">{{ mesa.numero_mesa }}
+                                    </h3>
+                                    <button class="p-1 text-slate-600 hover:text-blue-400" @click="regenerarPin(mesa)">
+                                        <ArrowPathIcon class="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <div class="qr-container bg-white p-2 rounded-xl mb-3 shadow-xl">
+                                    <qrcode-vue :value="obtenerUrlQR(mesa.id)" :size="90" level="H"
+                                        background="#ffffff" />
+                                </div>
+                                <div
+                                    class="w-full bg-black/40 rounded-lg py-1.5 px-3 flex justify-between items-center mb-3">
+                                    <LockClosedIcon class="w-3 h-3 text-slate-500" />
+                                    <span class="text-xs font-mono font-bold text-white tracking-widest">{{ mesa.pin
+                                    }}</span>
+                                </div>
+                                <button
+                                    class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-2 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-colors"
+                                    @click="limpiarMesa(mesa)">
+                                    Reiniciar Sesión
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { supabase } from '../lib/supabaseClient'
 import QrcodeVue from 'qrcode.vue'
 import type { Mesa, Cancion } from '../types/rockola'
+import {
+    Cog6ToothIcon,
+    ArrowPathIcon,
+    MusicalNoteIcon,
+    TableCellsIcon,
+    TvIcon,
+    ForwardIcon,
+    XMarkIcon,
+    PlusIcon,
+    LockClosedIcon,
+    ListBulletIcon,
+    ClockIcon
+} from '@heroicons/vue/24/solid'
 
 const mesas = ref<Mesa[]>([])
 const canciones = ref<Cancion[]>([])
 const historialAdmin = ref<Cancion[]>([])
 const nuevaMesaNombre = ref('')
 const tabActiva = ref<'musica' | 'mesas'>('musica')
+const subTabMusica = ref<'cola' | 'historial'>('cola')
+const cargando = ref(false)
 const player = ref<any>(null)
 
 const cancionSonando = computed(() => {
     return canciones.value.find(c => c.estado === 'reproduciendo')
+})
+
+const colaPendiente = computed(() => {
+    return canciones.value.filter(c => c.estado === 'pendiente')
 })
 
 const cargarDatosAdmin = async () => {
@@ -216,13 +309,8 @@ const limpiarMesa = async (mesa: Mesa) => {
     cargarDatosAdmin()
 }
 
-const saltarTemaActual = async () => {
-    if (!cancionSonando.value) return
-    await supabase.from('cola_reproduccion').update({ estado: 'saltada' }).eq('id', cancionSonando.value.id)
-    cargarDatosAdmin()
-}
-
 const quitarCancion = async (id: number) => {
+    if (!confirm('¿Quitar canción de la cola?')) return
     await supabase.from('cola_reproduccion').delete().eq('id', id)
     cargarDatosAdmin()
 }
@@ -288,11 +376,33 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.sticky-tabs {
+    position: sticky;
+    top: 56px;
+    /* Altura aproximada del header */
+    z-index: 45;
+}
+
 .admin-panel {
     background: #0a0f1e;
     color: #f8fafc;
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-content {
+    flex: 1;
+    padding: 15px;
+    padding-bottom: 80px;
+    /* Espacio para no chocar con controles de mobile */
 }
 
 .admin-header {
@@ -358,6 +468,26 @@ onUnmounted(() => {
     height: 3px;
     background: #3b82f6;
     border-radius: 10px 10px 0 0;
+}
+
+.scroll-container-admin {
+    flex: 1;
+    max-height: calc(100vh - 400px);
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+.scroll-styled::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scroll-styled::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scroll-styled::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 10px;
 }
 
 .dot-count {
