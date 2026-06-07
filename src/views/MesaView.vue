@@ -5,94 +5,115 @@
             <h1 class="logo-text">ROCKOLA<span>LIVE</span></h1>
         </header>
 
-        <!-- Bloque de búsqueda -->
-        <section class="search-section" :class="{ 'disabled': cancionesPropiasActivas.length >= 2 }">
-            <div class="search-box">
-                <input v-model="query" @keyup.enter="buscarYoutube" placeholder="Busca tu canción..."
-                    :disabled="cancionesPropiasActivas.length >= 2" />
-                <button @click="buscarYoutube" :disabled="cargando || cancionesPropiasActivas.length >= 2">
-                    <MagnifyingGlassIcon v-if="!cargando" class="w-5 h-5 mx-auto" />
-                    <span v-else class="loader"></span>
-                </button>
-            </div>
-            <p v-if="cancionesPropiasActivas.length >= 2" class="limit-msg">
-                <ExclamationTriangleIcon class="w-4 h-4 inline-block mr-1" /> Límite alcanzado (2 temas). Espera a que
-                terminen.
-            </p>
-        </section>
-
-        <!-- Resultados de búsqueda -->
-        <div class="search-results-container" v-if="busquedaRealizada && cancionesPropiasActivas.length < 2">
-            <div class="resultados" v-if="resultados.length">
-                <div v-for="video in resultados" :key="video.videoId" class="card-video" @click="validarYPedir(video)">
-                    <img :src="video.thumbnail" alt="thumb" />
-                    <div class="video-info">
-                        <p class="video-title">{{ video.title }}</p>
-                        <button class="btn-add">Añadir a la cola +</button>
-                    </div>
-                </div>
-            </div>
-            <div v-else class="no-results-msg">
-                {{ esResultadosLocales ? 'No encontramos esa canción en nuestra biblioteca...' :
-                    'No se encontraron resultados en YouTube...' }}
-            </div>
-
-            <button v-if="esResultadosLocales && cancionesPropiasActivas.length < 2" @click="buscarEnYoutubeAPI"
-                class="btn-youtube-search">
-                ¿No está en la lista? Buscar en YouTube
-                <TvIcon class="w-5 h-5 inline-block ml-1" />
+        <!-- Navegación por Tabs Estilo Mobile -->
+        <nav class="client-tabs">
+            <button :class="{ active: tabActiva === 'buscar' }" @click="tabActiva = 'buscar'">
+                <MagnifyingGlassIcon class="w-5 h-5" />
+                <span>Pedir</span>
             </button>
-        </div>
+            <button :class="{ active: tabActiva === 'cola' }" @click="tabActiva = 'cola'">
+                <MusicalNoteIcon class="w-5 h-5" />
+                <span>Cola</span>
+                <span v-if="cola.length" class="badge-count">{{ cola.length }}</span>
+            </button>
+            <button :class="{ active: tabActiva === 'historial' }" @click="tabActiva = 'historial'">
+                <ClockIcon class="w-5 h-5" />
+                <span>Mío</span>
+            </button>
+        </nav>
 
-        <!-- Fila de Reproducción Global -->
-        <section class="queue-section mt-6">
-            <h3 class="section-title flex items-center gap-2 mb-4">
-                <MusicalNoteIcon class="w-4 h-4" /> En Cola
-            </h3>
-            <div class="lista-cola scroll-mini-cliente">
-                <div v-for="(cancion, index) in cola" :key="cancion.id" class="item-cancion"
-                    :class="{ 'es-mia': cancion.mesa_id === mesaId, 'playing': cancion.estado === 'reproduciendo' }">
-                    <span class="index">#{{ index + 1 }}</span>
-                    <img :src="cancion.miniatura" class="mini-thumb" />
-                    <div class="info">
-                        <p class="titulo-c">{{ cancion.titulo }}</p>
-                        <div class="badges">
-                            <span class="tag-own" v-if="cancion.mesa_id === mesaId">
-                                <StarIcon class="w-2 h-2 inline-block mr-1" /> MI MESA
-                            </span>
-                            <span class="status-badge" :class="cancion.estado">
-                                {{ cancion.estado === 'reproduciendo' ? 'SONANDO AHORA' : 'EN COLA' }}
+        <main class="client-main-content">
+            <!-- Tab: Búsqueda -->
+            <section v-if="tabActiva === 'buscar'" class="animate-in">
+                <div class="search-section" :class="{ 'disabled': cancionesPropiasActivas.length >= 2 }">
+                    <div class="search-box">
+                        <input v-model="query" @keyup.enter="buscarYoutube" placeholder="Busca tu canción..."
+                            :disabled="cancionesPropiasActivas.length >= 2" />
+                        <button @click="buscarYoutube" :disabled="cargando || cancionesPropiasActivas.length >= 2">
+                            <MagnifyingGlassIcon v-if="!cargando" class="w-5 h-5 mx-auto" />
+                            <span v-else class="loader"></span>
+                        </button>
+                    </div>
+                    <p v-if="cancionesPropiasActivas.length >= 2" class="limit-msg">
+                        <ExclamationTriangleIcon class="w-4 h-4 inline-block mr-1" /> Límite alcanzado (2 temas). Espera
+                        a que terminen.
+                    </p>
+                </div>
+
+                <div class="search-results-container" v-if="busquedaRealizada && cancionesPropiasActivas.length < 2">
+                    <div class="resultados" v-if="resultados.length">
+                        <div v-for="video in resultados" :key="video.videoId" class="card-video"
+                            @click="validarYPedir(video)">
+                            <img :src="video.thumbnail" alt="thumb" />
+                            <div class="video-info">
+                                <p class="video-title">{{ video.title }}</p>
+                                <button class="btn-add">Añadir a la cola +</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="no-results-msg">
+                        {{ esResultadosLocales ? 'No encontramos esa canción en nuestra biblioteca...' :
+                            'No se encontraron resultados...' }}
+                    </div>
+
+                    <button v-if="esResultadosLocales && cancionesPropiasActivas.length < 2" @click="buscarEnYoutubeAPI"
+                        class="btn-youtube-search">
+                        ¿No está en la lista? Buscar en YouTube
+                        <TvIcon class="w-5 h-5 inline-block ml-1" />
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tab: Cola Global -->
+            <section v-if="tabActiva === 'cola'" class="animate-in">
+                <h3 class="section-title flex items-center gap-2 mb-4">
+                    <MusicalNoteIcon class="w-4 h-4" /> Próximos Temas
+                </h3>
+                <div class="lista-cola scroll-mini-cliente">
+                    <div v-for="(cancion, index) in cola" :key="cancion.id" class="item-cancion"
+                        :class="{ 'es-mia': cancion.mesa_id === mesaId, 'playing': cancion.estado === 'reproduciendo' }">
+                        <span class="index">#{{ index + 1 }}</span>
+                        <img :src="cancion.miniatura" class="mini-thumb" />
+                        <div class="info">
+                            <p class="titulo-c">{{ cancion.titulo }}</p>
+                            <div class="badges">
+                                <span class="tag-own" v-if="cancion.mesa_id === mesaId">
+                                    <StarIcon class="w-2 h-2 inline-block mr-1" /> MI PEDIDO
+                                </span>
+                                <span class="status-badge" :class="cancion.estado">
+                                    {{ cancion.estado === 'reproduciendo' ? 'SONANDO AHORA' : 'EN COLA' }}
+                                </span>
+                            </div>
+                        </div>
+                        <button v-if="cancion.mesa_id === mesaId && cancion.estado !== 'reproduciendo'"
+                            @click="eliminarPedido(cancion.id)" class="btn-delete-mia" title="Eliminar mi pedido">
+                            <XMarkIcon class="w-5 h-5 mx-auto" />
+                        </button>
+                    </div>
+                    <div v-if="cola.length === 0" class="empty-msg">No hay canciones en cola</div>
+                </div>
+            </section>
+
+            <!-- Tab: Historial Personal -->
+            <section v-if="tabActiva === 'historial'" class="animate-in">
+                <h3 class="section-title flex items-center gap-2">
+                    <ClockIcon class="w-4 h-4" /> Tus Pedidos Anteriores
+                </h3>
+                <div class="lista-historial scroll-mini">
+                    <div v-for="h in historial" :key="h.id" class="item-historial" @click="repedirCancion(h)">
+                        <img :src="h.miniatura" />
+                        <div class="h-info">
+                            <p>{{ h.titulo }}</p>
+                            <span>
+                                Pedir de nuevo
+                                <ArrowUturnLeftIcon class="w-3 h-3 inline-block ml-1" />
                             </span>
                         </div>
                     </div>
-                    <!-- Botón para eliminar pedido propio si no está sonando -->
-                    <button v-if="cancion.mesa_id === mesaId && cancion.estado !== 'reproduciendo'"
-                        @click="eliminarPedido(cancion.id)" class="btn-delete-mia" title="Eliminar mi pedido">
-                        <XMarkIcon class="w-5 h-5 mx-auto" />
-                    </button>
+                    <div v-if="historial.length === 0" class="empty-msg">No has pedido canciones aún</div>
                 </div>
-                <div v-if="cola.length === 0" class="empty-msg">No hay canciones en cola</div>
-            </div>
-        </section>
-
-        <!-- Historial Personal de esta Mesa -->
-        <section class="history-section" v-if="historial.length">
-            <h3 class="section-title flex items-center gap-2">
-                <ArrowPathIcon class="w-4 h-4" /> Tu Historial
-            </h3>
-            <div class="lista-historial scroll-mini">
-                <div v-for="h in historial" :key="h.id" class="item-historial" @click="repedirCancion(h)">
-                    <img :src="h.miniatura" />
-                    <div class="h-info">
-                        <p>{{ h.titulo }}</p>
-                        <span>
-                            Pedir de nuevo
-                            <ArrowUturnLeftIcon class="w-3 h-3 inline-block ml-1" />
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
+        </main>
     </div>
 
     <!-- Modal / Pantalla de Ingreso de PIN -->
@@ -135,7 +156,9 @@ import {
     XMarkIcon,
     ArrowUturnLeftIcon,
     LockClosedIcon,
-    StarIcon
+    StarIcon,
+    ClockIcon,
+    MusicalNoteIcon
 } from '@heroicons/vue/24/solid'
 
 const route = useRoute()
@@ -150,6 +173,7 @@ const historial = ref<Cancion[]>([])
 const cargando = ref(false)
 const errorSesion = ref('')
 const mesaNombre = ref('')
+const tabActiva = ref('buscar')
 const mostarLoginPin = ref(false)
 const pinIngresado = ref('')
 
@@ -363,18 +387,23 @@ onUnmounted(() => { if (realtimeChannel) supabase.removeChannel(realtimeChannel)
 .container-client {
     background: #0f172a;
     color: #f8fafc;
-    min-height: 100vh;
+    height: 100dvh;
     max-width: 500px;
     margin: 0 auto;
-    padding: 20px;
     font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .client-header {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 30px;
+    padding: 15px 20px 5px;
+    background: #0f172a;
+    z-index: 20;
 }
 
 .mesa-badge {
@@ -509,10 +538,91 @@ onUnmounted(() => { if (realtimeChannel) supabase.removeChannel(realtimeChannel)
 
 .section-title {
     font-size: 16px;
-    margin: 30px 0 15px;
+    margin: 10px 0 15px;
     color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+/* Tabs Estilo Mobile */
+.client-tabs {
+    flex-shrink: 0;
+    display: flex;
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 4px;
+    margin: 5px 20px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 20;
+}
+
+.client-tabs button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 0;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.client-main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 40px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Estilizado de scroll discreto */
+.client-main-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.client-main-content::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 10px;
+}
+
+.client-tabs button.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.badge-count {
+    position: absolute;
+    top: 5px;
+    right: 15%;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    min-width: 16px;
+}
+
+.animate-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .item-cancion {
@@ -527,8 +637,9 @@ onUnmounted(() => { if (realtimeChannel) supabase.removeChannel(realtimeChannel)
 }
 
 .item-cancion.es-mia {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.05);
+    border: 2px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
 }
 
 .item-cancion.playing {
@@ -561,10 +672,11 @@ onUnmounted(() => { if (realtimeChannel) supabase.removeChannel(realtimeChannel)
 .tag-own {
     background: #3b82f6;
     color: white;
-    font-size: 9px;
-    padding: 2px 6px;
+    font-size: 10px;
+    padding: 3px 8px;
     border-radius: 4px;
-    font-weight: 700;
+    font-weight: 900;
+    letter-spacing: 0.5px;
 }
 
 .status-badge {
