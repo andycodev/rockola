@@ -2,6 +2,7 @@ export interface Mesa {
     id: string
     numero_mesa: string
     token_actual: string
+    pin: string
     creado_en: string
 }
 
