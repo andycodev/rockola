@@ -97,7 +97,7 @@
                                     <div
                                         class="flex items-center gap-3 p-2 bg-[#0a0f1e] rounded-xl border border-[#1e293b] mb-2 group">
                                         <img :src="item.miniatura" class="w-12 h-12 object-cover rounded-lg shrink-0" />
-                                        <div class="flex-1 min-w-0">
+                                        <div class="flex-1 min-w-0" style="min-width: 0;">
                                             <h4 class="text-white text-xs font-bold truncate">{{ item.titulo }}</h4>
                                             <p class="text-[#64748b] text-[10px] font-black uppercase">{{
                                                 obtenerNombreMesa(item.mesa_id) }}</p>
@@ -152,7 +152,8 @@
                             <div v-for="mesa in mesas" :key="mesa.id"
                                 class="card-mesa bg-[#111827] border border-[#1e293b] p-3 rounded-2xl flex flex-col items-center">
                                 <div class="w-full flex justify-between items-start mb-2 gap-2">
-                                    <h3 class="text-blue-500 font-black text-sm uppercase italic truncate flex-1">{{ mesa.numero_mesa }}
+                                    <h3 class="text-blue-500 font-black text-sm uppercase italic truncate flex-1">{{
+                                        mesa.numero_mesa }}
                                     </h3>
                                     <div class="flex gap-1">
                                         <button class="p-1 text-slate-600 hover:text-blue-400"
@@ -288,20 +289,22 @@ const descargarQR = (mesa: Mesa) => {
     const canvas = container?.querySelector('canvas')
     if (!canvas) return
 
-    // Generar una versión de alta resolución para la descarga
+    // Generar una versión de alta resolución con margen de seguridad
     const tempCanvas = document.createElement('canvas')
-    const size = 1024 
+    const size = 1024
+    const margin = 80 // Margen blanco para que el lector lo detecte mejor
     tempCanvas.width = size
     tempCanvas.height = size
     const ctx = tempCanvas.getContext('2d')
-    
+
     if (ctx) {
         // Dibujar fondo blanco
-        ctx.fillStyle = '#white'
+        ctx.fillStyle = '#ffffff'
         ctx.fillRect(0, 0, size, size)
+
         // Dibujar el QR escalado sin suavizado para mantener los bordes perfectos
         ctx.imageSmoothingEnabled = false
-        ctx.drawImage(canvas, 0, 0, size, size)
+        ctx.drawImage(canvas, margin, margin, size - (margin * 2), size - (margin * 2))
     }
 
     const link = document.createElement('a')

@@ -41,7 +41,7 @@
                 </div>
 
                 <!-- Mis Pedidos Actuales (Debajo del buscador) -->
-                <div v-if="cancionesPropiasActivas.length > 0" class="mis-pedidos-actuales animate-in mt-4 mb-10">
+                <div v-if="cancionesPropiasActivas.length > 0" class="mis-pedidos-actuales animate-in mt-6 mb-12">
                     <p class="text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Mis pedidos activos:
                     </p>
                     <div v-for="cancion in cancionesPropiasActivas" :key="cancion.id" class="item-cancion-mini"
@@ -567,7 +567,7 @@ onUnmounted(() => { if (realtimeChannel) supabase.removeChannel(realtimeChannel)
 
 /* Sección de pedidos propios bajo el buscador */
 .mis-pedidos-actuales {
-    padding: 18px;
+    padding: 20px;
     background: rgba(59, 130, 246, 0.05);
     border-radius: 16px;
     border: 1px dashed rgba(59, 130, 246, 0.3);
