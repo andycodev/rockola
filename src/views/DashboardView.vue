@@ -37,8 +37,8 @@
                         <div class="flex justify-center gap-3">
                             <div
                                 class="flex items-center bg-orange-600 text-white pl-2.5 pr-1 py-1 rounded-full shadow-lg shadow-orange-200">
-                                <TruckIcon class="w-3.5 h-3.5 mr-1.5 opacity-80" />
-                                <span class="text-[10px] font-black uppercase tracking-widest mr-2">Bus 1</span>
+                                <MusicalNoteIcon class="w-3.5 h-3.5 mr-1.5 opacity-80" />
+                                <span class="text-[10px] font-black uppercase tracking-widest mr-2">Mesa 1</span>
                                 <div
                                     class="bg-white text-orange-600 h-6 min-w-[24px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-black">
                                     {{ pasajerosBus1.length }}
@@ -46,8 +46,8 @@
                             </div>
                             <div
                                 class="flex items-center bg-amber-500 text-white pl-2.5 pr-1 py-1 rounded-full shadow-lg shadow-amber-200">
-                                <TruckIcon class="w-3.5 h-3.5 mr-1.5 opacity-80" />
-                                <span class="text-[10px] font-black uppercase tracking-widest mr-2">Bus 2</span>
+                                <MusicalNoteIcon class="w-3.5 h-3.5 mr-1.5 opacity-80" />
+                                <span class="text-[10px] font-black uppercase tracking-widest mr-2">Mesa 2</span>
                                 <div
                                     class="bg-white text-amber-500 h-6 min-w-[24px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-black">
                                     {{ pasajerosBus2.length }}
@@ -63,12 +63,12 @@
                 <div class="bg-slate-900 rounded-2xl p-3 text-white flex items-center justify-between shadow-lg">
                     <div class="flex gap-4">
                         <div class="text-center">
-                            <p class="text-[10px] uppercase font-black text-slate-400">Subieron</p>
+                            <p class="text-[10px] uppercase font-black text-slate-400">Tocadas</p>
                             <p class="text-lg font-black text-green-400 leading-none">{{ statsAsistencia.asistieron }}
                             </p>
                         </div>
                         <div class="text-center border-l border-slate-700 pl-4">
-                            <p class="text-[10px] uppercase font-black text-slate-400">Faltan</p>
+                            <p class="text-[10px] uppercase font-black text-slate-400">Pendientes</p>
                             <p class="text-lg font-black text-orange-400 leading-none">{{ statsAsistencia.faltan }}</p>
                         </div>
                     </div>
@@ -100,12 +100,12 @@
                     <button @click="tabActiva = 'bus1'"
                         :class="tabActiva === 'bus1' ? 'bg-white text-orange-600 shadow-md' : 'text-slate-500'"
                         class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all duration-200 text-sm">
-                        <TruckIcon class="w-4 h-4" /> Bus 1
+                        <MusicalNoteIcon class="w-4 h-4" /> Mesa 1
                     </button>
                     <button @click="tabActiva = 'bus2'"
                         :class="tabActiva === 'bus2' ? 'bg-white text-amber-600 shadow-md' : 'text-slate-500'"
                         class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all duration-200 text-sm">
-                        <TruckIcon class="w-4 h-4" /> Bus 2
+                        <MusicalNoteIcon class="w-4 h-4" /> Mesa 2
                     </button>
                 </nav>
             </div>
@@ -114,7 +114,7 @@
             <div v-if="tabActiva !== 'registro'" class="px-4 pb-3 max-w-md mx-auto animate-in fade-in duration-300">
                 <div class="relative group">
                     <MagnifyingGlassIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input v-model="filtroNombre" type="text" :placeholder="'Buscar en Bus ' + tabActiva.at(-1)"
+                    <input v-model="filtroNombre" type="text" :placeholder="'Buscar en Mesa ' + tabActiva.at(-1)"
                         class="w-full pl-12 pr-4 py-3 rounded-2xl border-none bg-slate-100 outline-none font-bold text-slate-700 focus:ring-2 focus:ring-orange-500/20" />
                 </div>
             </div>
@@ -135,19 +135,19 @@
                             </div>
                             <div>
                                 <h2 class="text-xl font-bold text-slate-900 leading-none">
-                                    {{ editandoPasajeroId ? 'Editar Pasajero' : 'Nuevo Registro' }}
+                                    {{ editandoPasajeroId ? 'Editar Canción' : 'Nueva Canción' }}
                                 </h2>
                                 <p class="text-xs text-slate-500 mt-1 uppercase font-semibold tracking-tighter">Ingrese
-                                    datos del pasajero</p>
+                                    datos del pedido</p>
                             </div>
                         </div>
 
                         <form @submit.prevent="guardarPasajero" class="space-y-5">
                             <div class="space-y-1.5">
                                 <label class="text-xs font-black uppercase text-slate-400 ml-1">Nombre
-                                    Completo</label>
+                                    de la Canción</label>
                                 <input v-model="formulario.nombre" @input="validarNombre" type="text" required
-                                    placeholder="Ej. JUAN PEREZ"
+                                    placeholder="Ej. TUSA - KAROL G"
                                     class="w-full rounded-2xl border-slate-200 bg-slate-50 px-5 py-4 text-base font-bold outline-none transition focus:ring-4 focus:ring-orange-500/10 focus:bg-white uppercase" />
                             </div>
 
@@ -160,14 +160,14 @@
                                 </div>
                                 <div class="space-y-1.5">
                                     <label
-                                        class="text-xs font-black uppercase text-slate-400 ml-1 text-center block">Unidad</label>
+                                        class="text-xs font-black uppercase text-slate-400 ml-1 text-center block">Ubicación</label>
                                     <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl h-[60px]">
                                         <button type="button" @click="formulario.bus_asignado = 1"
                                             :class="formulario.bus_asignado === 1 ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-500'"
-                                            class="rounded-xl text-sm font-black transition-all">Bus 1</button>
+                                            class="rounded-xl text-sm font-black transition-all">Mesa 1</button>
                                         <button type="button" @click="formulario.bus_asignado = 2"
                                             :class="formulario.bus_asignado === 2 ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-500'"
-                                            class="rounded-xl text-sm font-black transition-all">Bus 2</button>
+                                            class="rounded-xl text-sm font-black transition-all">Mesa 2</button>
                                     </div>
                                 </div>
                             </div>
@@ -276,7 +276,7 @@
                                             class="w-full px-4 py-3 text-left text-xs font-bold flex items-center gap-3 hover:bg-slate-50">
                                             <CheckCircleIcon :class="p.asistio ? 'text-orange-500' : 'text-green-500'"
                                                 class="w-5 h-5" />
-                                            {{ p.asistio ? 'Anular Asistencia' : 'Subió al Bus' }}
+                                            {{ p.asistio ? 'Poner en espera' : 'Marcar como Tocada' }}
                                         </button>
                                         <button v-if="p.telefono" @click="pasajeroALlamar = p; activeMenuId = null"
                                             class="w-full px-4 py-3 text-left text-xs font-bold flex items-center gap-3 hover:bg-slate-50 text-slate-700">
@@ -325,7 +325,7 @@
                         <DocumentTextIcon class="w-8 h-8" />
                     </div>
                     <h3 class="font-black text-slate-900 uppercase text-xs tracking-widest mb-1 opacity-50">Nota del
-                        Pasajero</h3>
+                        Pedido</h3>
                     <p class="text-base font-bold text-slate-800 mb-4 uppercase leading-tight">
                         {{ notaEnModal.nombre_completo }}
                     </p>
@@ -355,10 +355,10 @@
                     <h3 class="font-black text-slate-900 uppercase text-sm tracking-widest mb-2">Confirmar Llamada</h3>
                     <p class="text-slate-500 text-xs mb-6">
                         ¿Deseas llamar a <span class="font-bold text-slate-800">{{ pasajeroALlamar.nombre_completo
-                            }}</span>?
+                        }}</span>?
                         <br>
                         <span class="text-[14px] font-black text-green-600 block mt-2">{{ pasajeroALlamar.telefono
-                            }}</span>
+                        }}</span>
                     </p>
                     <div class="flex gap-3">
                         <button @click="pasajeroALlamar = null"
@@ -419,8 +419,8 @@
                     <h3 class="font-black text-slate-900 uppercase text-sm tracking-widest mb-2">Reiniciar Lista</h3>
                     <p class="text-slate-500 text-xs mb-6 px-2">
                         Esto marcará a TODOS los pasajeros como <span
-                            class="font-bold text-slate-800 underline uppercase">pendientes</span>. Ideal para iniciar
-                        el viaje de vuelta.
+                            class="font-bold text-slate-800 underline uppercase">pendientes</span>. Ideal para empezar
+                        un nuevo turno.
                     </p>
                     <div class="flex gap-3">
                         <button @click="mostrarModalReinicio = false"
@@ -440,30 +440,24 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabaseClient'
 // Importar iconos de Heroicons
 import {
     CheckCircleIcon,
     UserPlusIcon,
-    TruckIcon,
     PencilSquareIcon,
     TrashIcon,
     PhoneIcon,
     UserGroupIcon,
     DocumentTextIcon,
     MagnifyingGlassIcon,
-    XMarkIcon,
     EllipsisVerticalIcon,
     CheckIcon,
     ArrowPathIcon,
     ArrowDownTrayIcon,
-    ShareIcon
+    ShareIcon,
+    MusicalNoteIcon
 } from '@heroicons/vue/24/outline'
-
-// Configuración de Supabase
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // Importar componentes y funciones de notificación
 import Notification from '@/components/shared/Notification.vue'
@@ -526,8 +520,9 @@ const statsAsistencia = computed(() => {
 // Obtener la lista inicial de pasajeros de la base de datos
 const cargarPasajeros = async () => {
     const { data, error } = await supabase
-        .from('pasajeros')
+        .from('cola_reproduccion')
         .select('*')
+        .rename('nombre_completo', 'titulo') // Si las columnas se llaman diferente, hay que mapear
         .order('creado_en', { ascending: false })
 
     if (!error) pasajeros.value = data
@@ -537,7 +532,7 @@ const cargarPasajeros = async () => {
 const activarTiempoReal = () => {
     supabase
         .channel('cambios-pasajeros')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'pasajeros' }, (payload) => {
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_reproduccion' }, (payload) => {
             const { eventType, new: newRow, old: oldRow } = payload
             console.log('Cambio detectado:', eventType, payload)
 
@@ -590,7 +585,7 @@ const guardarPasajero = async () => {
 
     // Validar que el nombre no esté vacío
     if (!formulario.value.nombre.trim()) {
-        showNotification('El nombre del pasajero no puede estar vacío.', 'alert-warning')
+        showNotification('El nombre de la canción no puede estar vacío.', 'alert-warning')
         guardando.value = false
         return
     }
@@ -613,14 +608,14 @@ const guardarPasajero = async () => {
     if (editandoPasajeroId.value) {
         // Modo edición: Actualizar pasajero existente
         const { error: updateError } = await supabase
-            .from('pasajeros')
+            .from('cola_reproduccion')
             .update(datosAEnviar)
             .eq('id', editandoPasajeroId.value)
         error = updateError
     } else {
         // Modo registro: Insertar nuevo pasajero
         const { error: insertError } = await supabase
-            .from('pasajeros')
+            .from('cola_reproduccion')
             .insert([datosAEnviar])
         error = insertError
     }
@@ -629,14 +624,14 @@ const guardarPasajero = async () => {
 
     if (error) {
         if (error.code === '23505') {
-            showNotification(`El pasajero "${nombreLimpio}" ya está registrado.`, 'alert-warning')
+            showNotification(`La canción "${nombreLimpio}" ya está en cola.`, 'alert-warning')
         } else {
-            showNotification(`Error al guardar pasajero: ${error.message}`, 'alert-error')
+            showNotification(`Error al guardar: ${error.message}`, 'alert-error')
         }
         return
     }
 
-    showNotification(`Pasajero ${editandoPasajeroId.value ? 'actualizado' : 'registrado'} con éxito.`, 'alert-success')
+    showNotification(`Canción ${editandoPasajeroId.value ? 'actualizada' : 'registrada'} con éxito.`, 'alert-success')
 
     // Si estábamos editando, regresamos a la lista del bus correspondiente
     if (editandoPasajeroId.value) {
@@ -674,17 +669,17 @@ const eliminarPasajero = (pasajero) => {
 const confirmarEliminacionDefinitiva = async () => {
     const id = pasajeroAEliminar.value.id
     const { error } = await supabase
-        .from('pasajeros')
+        .from('cola_reproduccion')
         .delete()
         .eq('id', id)
 
     if (error) {
-        showNotification(`Error al eliminar pasajero: ${error.message}`, 'alert-error')
+        showNotification(`Error al eliminar: ${error.message}`, 'alert-error')
         return
     }
 
     pasajeroAEliminar.value = null
-    showNotification('Pasajero eliminado con éxito.', 'alert-success')
+    showNotification('Pedido eliminado con éxito.', 'alert-success')
 
     // Si el pasajero eliminado era el que se estaba editando, cancelar edición
     if (editandoPasajeroId.value === id) {
@@ -697,13 +692,13 @@ const toggleAsistencia = async (pasajero) => {
     const nuevoEstado = !pasajero.asistio
     const { error } = await supabase
         .from('pasajeros')
-        .update({ asistio: nuevoEstado })
+        .update({ estado: nuevoEstado ? 'completada' : 'pendiente' })
         .eq('id', pasajero.id)
 
     if (error) {
-        showNotification(`Error al actualizar asistencia: ${error.message}`, 'alert-error')
+        showNotification(`Error al actualizar: ${error.message}`, 'alert-error')
     } else {
-        const msg = nuevoEstado ? 'Pasajero subió al bus' : 'Asistencia anulada'
+        const msg = nuevoEstado ? 'Marcada como tocada' : 'En espera'
         showNotification(msg, 'alert-info')
     }
 }
@@ -717,12 +712,12 @@ const ejecutarReinicioGeneral = async () => {
     const busId = tabActiva.value === 'bus1' ? 1 : 2
 
     const { error } = await supabase
-        .from('pasajeros')
-        .update({ asistio: false })
+        .from('cola_reproduccion')
+        .update({ estado: 'pendiente' })
         .eq('bus_asignado', busId)
 
     if (error) {
-        showNotification(`Error al reiniciar lista: ${error.message}`, 'alert-error')
+        showNotification(`Error al reiniciar: ${error.message}`, 'alert-error')
     } else {
         showNotification('Lista reiniciada correctamente.', 'alert-success')
     }
@@ -754,12 +749,11 @@ const compartirWhatsApp = (esResumenGeneral = false) => {
     let texto = ''
 
     if (esResumenGeneral) {
-        texto = `*RESUMEN GENERAL - CONTROL DE PASAJEROS*\n`
+        texto = `*ROCKOLA LIVE - RESUMEN GENERAL*\n`
         texto += `Total Registrados: ${pasajeros.value.length}\n`
         texto += `--------------------------\n`
-        texto += `🚌 BUS 1: ${pasajerosBus1.value.length} personas\n`
-        texto += `🚌 BUS 2: ${pasajerosBus2.value.length} personas\n`
-        texto += `\n_Respaldo al Dr. Roldán Díaz_`
+        texto += `🎵 Mesa 1: ${pasajerosBus1.value.length} canciones\n`
+        texto += `🎵 Mesa 2: ${pasajerosBus2.value.length} canciones\n`
     } else {
         const busNum = tabActiva.value.at(-1)
         const lista = tabActiva.value === 'bus1' ? pasajerosBus1.value : pasajerosBus2.value
@@ -769,8 +763,8 @@ const compartirWhatsApp = (esResumenGeneral = false) => {
             return
         }
 
-        texto = `*LISTA DE PASAJEROS - BUS ${busNum}*\n`
-        texto += `Total: ${lista.length} | Subieron: ${statsAsistencia.value.asistieron}\n`
+        texto = `*COLA DE REPRODUCCIÓN - MESA ${busNum}*\n`
+        texto += `Total: ${lista.length} | Tocadas: ${statsAsistencia.value.asistieron}\n`
         texto += `--------------------------\n\n`
 
         lista.forEach((p, index) => {
@@ -781,7 +775,7 @@ const compartirWhatsApp = (esResumenGeneral = false) => {
             texto += '\n'
         })
 
-        texto += `\n_Huaca Blanca 2026 💚🧡_`
+        texto += `\n_Generado por Rockola Live RL_`
     }
 
     const encodedText = encodeURIComponent(texto)
@@ -812,6 +806,52 @@ const vClickOutside = {
     unmounted(el) {
         document.body.removeEventListener('click', el.clickOutsideEvent)
     }
+}
+</script>
+
+<style scoped>
+/* Animaciones */
+.list-enter-active,
+.list-leave-active,
+.fade-enter-active,
+.fade-leave-active {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.list-move {
+    transition: transform 0.3s ease;
+}
+
+/* Para evitar scroll horizontal en iOS */
+html,
+body {
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+}
+</style>tiva para detectar clics fuera de un elemento (para cerrar el menú)
+const vClickOutside = {
+mounted(el, binding) {
+el.clickOutsideEvent = (event) => {
+if (!(el === event.target || el.contains(event.target))) {
+binding.value()
+}
+}
+document.body.addEventListener('click', el.clickOutsideEvent)
+},
+unmounted(el) {
+document.body.removeEventListener('click', el.clickOutsideEvent)
+}
 }
 </script>
 
