@@ -40,6 +40,27 @@
                     </p>
                 </div>
 
+                <!-- Mis Pedidos Actuales (Debajo del buscador) -->
+                <div v-if="cancionesPropiasActivas.length > 0" class="mis-pedidos-actuales animate-in">
+                    <p class="text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Mis pedidos activos:
+                    </p>
+                    <div v-for="cancion in cancionesPropiasActivas" :key="cancion.id" class="item-cancion-mini"
+                        :class="{ 'playing': cancion.estado === 'reproduciendo' }">
+                        <img :src="cancion.miniatura" class="mini-thumb-resumen" />
+                        <div class="info-mini">
+                            <p class="titulo-mini">{{ cancion.titulo }}</p>
+                            <span class="status-badge-mini" :class="cancion.estado">
+                                {{ cancion.estado === 'reproduciendo' ? 'SONANDO' : 'EN COLA' }}
+                            </span>
+                        </div>
+                        <!-- Botón eliminar si aún no suena -->
+                        <button v-if="cancion.estado !== 'reproduciendo'" @click="eliminarPedido(cancion.id)"
+                            class="btn-delete-mini" title="Cancelar">
+                            <XMarkIcon class="w-4 h-4 mx-auto" />
+                        </button>
+                    </div>
+                </div>
+
                 <div class="search-results-container" v-if="busquedaRealizada && cancionesPropiasActivas.length < 2">
                     <div class="resultados" v-if="resultados.length">
                         <div v-for="video in resultados" :key="video.videoId" class="card-video"
@@ -542,6 +563,72 @@ onUnmounted(() => { if (realtimeChannel) supabase.removeChannel(realtimeChannel)
     color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+/* Sección de pedidos propios bajo el buscador */
+.mis-pedidos-actuales {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(59, 130, 246, 0.05);
+    border-radius: 16px;
+    border: 1px dashed rgba(59, 130, 246, 0.3);
+}
+
+.item-cancion-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #1e293b;
+    padding: 8px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    border: 1px solid #334155;
+}
+
+.item-cancion-mini.playing {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.mini-thumb-resumen {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.info-mini {
+    flex: 1;
+    min-width: 0;
+}
+
+.titulo-mini {
+    font-size: 11px;
+    font-weight: 700;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #f8fafc;
+}
+
+.status-badge-mini {
+    font-size: 8px;
+    font-weight: 900;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.btn-delete-mini {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: none;
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
 /* Tabs Estilo Mobile */
