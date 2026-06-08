@@ -151,8 +151,8 @@
                         <div class="mesas-grid grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <div v-for="mesa in mesas" :key="mesa.id"
                                 class="card-mesa bg-[#111827] border border-[#1e293b] p-3 rounded-2xl flex flex-col items-center">
-                                <div class="w-full flex justify-between items-start mb-2">
-                                    <h3 class="text-blue-500 font-black text-sm uppercase italic">{{ mesa.numero_mesa }}
+                                <div class="w-full flex justify-between items-start mb-2 gap-2">
+                                    <h3 class="text-blue-500 font-black text-sm uppercase italic truncate flex-1">{{ mesa.numero_mesa }}
                                     </h3>
                                     <div class="flex gap-1">
                                         <button class="p-1 text-slate-600 hover:text-blue-400"
@@ -166,8 +166,8 @@
                                     </div>
                                 </div>
                                 <div :id="'qr-container-' + mesa.id"
-                                    class="qr-container bg-white p-2 rounded-xl mb-3 shadow-xl">
-                                    <qrcode-vue :value="obtenerUrlQR(mesa.id)" :size="90" level="H"
+                                    class="qr-container bg-white p-1 rounded-lg mb-3 shadow-xl">
+                                    <qrcode-vue :value="obtenerUrlQR(mesa.id)" :size="160" level="H"
                                         background="#ffffff" />
                                 </div>
 
@@ -288,9 +288,25 @@ const descargarQR = (mesa: Mesa) => {
     const canvas = container?.querySelector('canvas')
     if (!canvas) return
 
+    // Generar una versión de alta resolución para la descarga
+    const tempCanvas = document.createElement('canvas')
+    const size = 1024 
+    tempCanvas.width = size
+    tempCanvas.height = size
+    const ctx = tempCanvas.getContext('2d')
+    
+    if (ctx) {
+        // Dibujar fondo blanco
+        ctx.fillStyle = '#white'
+        ctx.fillRect(0, 0, size, size)
+        // Dibujar el QR escalado sin suavizado para mantener los bordes perfectos
+        ctx.imageSmoothingEnabled = false
+        ctx.drawImage(canvas, 0, 0, size, size)
+    }
+
     const link = document.createElement('a')
     link.download = `QR_${mesa.numero_mesa.replace(/\s+/g, '_')}.png`
-    link.href = canvas.toDataURL('image/png')
+    link.href = tempCanvas.toDataURL('image/png')
     link.click()
     showNotification('QR descargado', 'alert-success')
 }
