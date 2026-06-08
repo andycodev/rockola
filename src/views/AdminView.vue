@@ -154,19 +154,49 @@
                                 <div class="w-full flex justify-between items-start mb-2">
                                     <h3 class="text-blue-500 font-black text-sm uppercase italic">{{ mesa.numero_mesa }}
                                     </h3>
-                                    <button class="p-1 text-slate-600 hover:text-blue-400" @click="regenerarPin(mesa)">
-                                        <ArrowPathIcon class="w-4 h-4" />
-                                    </button>
+                                    <div class="flex gap-1">
+                                        <button class="p-1 text-slate-600 hover:text-blue-400"
+                                            @click="regenerarPin(mesa)" title="Regenerar PIN">
+                                            <ArrowPathIcon class="w-4 h-4" />
+                                        </button>
+                                        <button class="p-1 text-slate-600 hover:text-blue-400"
+                                            @click="descargarQR(mesa)" title="Descargar imagen QR">
+                                            <ArrowDownTrayIcon class="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="qr-container bg-white p-2 rounded-xl mb-3 shadow-xl">
+                                <div :id="'qr-container-' + mesa.id"
+                                    class="qr-container bg-white p-2 rounded-xl mb-3 shadow-xl">
                                     <qrcode-vue :value="obtenerUrlQR(mesa.id)" :size="90" level="H"
                                         background="#ffffff" />
                                 </div>
+
+                                <!-- Link de la mesa copiable -->
+                                <div class="w-full mb-3 px-1">
+                                    <p class="text-[9px] text-slate-500 uppercase font-black mb-1 text-left">Link:</p>
+                                    <div class="relative group">
+                                        <input readonly :value="obtenerUrlQR(mesa.id)"
+                                            @click="($event.target as HTMLInputElement).select()"
+                                            class="w-full bg-black/30 border border-white/5 rounded-lg pl-2 pr-8 py-1.5 text-[9px] text-blue-400 outline-none cursor-pointer truncate" />
+                                        <button @click="copiarAlPortapapeles(obtenerUrlQR(mesa.id), '¡Link copiado!')"
+                                            class="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white transition-colors">
+                                            <DocumentDuplicateIcon class="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div
                                     class="w-full bg-black/40 rounded-lg py-1.5 px-3 flex justify-between items-center mb-3">
                                     <LockClosedIcon class="w-3 h-3 text-slate-500" />
-                                    <span class="text-xs font-mono font-bold text-white tracking-widest">{{ mesa.pin
-                                    }}</span>
+                                    <div class="flex items-center gap-2">
+                                        <input readonly :value="mesa.pin"
+                                            @click="($event.target as HTMLInputElement).select()"
+                                            class="bg-transparent border-none p-0 text-xs font-mono font-bold text-white tracking-widest w-12 text-right outline-none cursor-pointer" />
+                                        <button @click="copiarAlPortapapeles(mesa.pin, '¡PIN copiado!')"
+                                            class="text-slate-500 hover:text-white transition-colors">
+                                            <DocumentDuplicateIcon class="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
                                 </div>
                                 <button
                                     class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-2 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-colors"
@@ -187,6 +217,7 @@ import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { supabase } from '../lib/supabaseClient'
 import QrcodeVue from 'qrcode.vue'
 import type { Mesa, Cancion } from '../types/rockola'
+import { showNotification } from '@/events/notificationEvents'
 import {
     Cog6ToothIcon,
     ArrowPathIcon,
@@ -198,7 +229,9 @@ import {
     PlusIcon,
     LockClosedIcon,
     ListBulletIcon,
-    ClockIcon
+    ClockIcon,
+    DocumentDuplicateIcon,
+    ArrowDownTrayIcon
 } from '@heroicons/vue/24/solid'
 
 const mesas = ref<Mesa[]>([])
@@ -239,6 +272,27 @@ const cargarDatosAdmin = async () => {
         .order('id', { ascending: false })
         .limit(10)
     historialAdmin.value = h || []
+}
+
+const copiarAlPortapapeles = async (texto: string, mensaje: string) => {
+    try {
+        await navigator.clipboard.writeText(texto)
+        showNotification(mensaje, 'alert-success')
+    } catch (err) {
+        showNotification('No se pudo copiar el texto', 'alert-error')
+    }
+}
+
+const descargarQR = (mesa: Mesa) => {
+    const container = document.getElementById(`qr-container-${mesa.id}`)
+    const canvas = container?.querySelector('canvas')
+    if (!canvas) return
+
+    const link = document.createElement('a')
+    link.download = `QR_${mesa.numero_mesa.replace(/\s+/g, '_')}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+    showNotification('QR descargado', 'alert-success')
 }
 
 // Crear una nueva mesa en el sistema
