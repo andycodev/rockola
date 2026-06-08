@@ -8,10 +8,10 @@
             <header class="px-4 py-3 max-w-md mx-auto">
                 <div class="max-w-md mx-auto">
                     <h1 class="text-xl font-black tracking-tight text-slate-900 uppercase text-center">
-                        Control de <span class="text-orange-600">pasajeros</span>
+                        ROCKOLA <span class="text-orange-600">LIVE</span>
                     </h1>
                     <p class="text-sm text-slate-500 text-center font-bold mt-1 leading-tight px-4">
-                        Registro de personas en respaldo al Dr. Roldán Díaz.
+                        Gestiona las canciones y pedidos de tus clientes en tiempo real.
                     </p>
 
                     <!-- Resumen Total General -->
@@ -24,12 +24,12 @@
                             </div>
                             <div class="ml-4 flex flex-col items-start leading-none">
                                 <span class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">Total
-                                    Pasajeros</span>
+                                    Canciones</span>
                                 <div class="flex items-baseline gap-1">
                                     <span class="text-2xl font-black text-orange-500 tracking-tighter">{{
                                         pasajeros.length }}</span>
-                                    <span
-                                        class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Registrados</span>
+                                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">En
+                                        Cola</span>
                                 </div>
                             </div>
                         </div>
@@ -355,10 +355,10 @@
                     <h3 class="font-black text-slate-900 uppercase text-sm tracking-widest mb-2">Confirmar Llamada</h3>
                     <p class="text-slate-500 text-xs mb-6">
                         ¿Deseas llamar a <span class="font-bold text-slate-800">{{ pasajeroALlamar.nombre_completo
-                        }}</span>?
+                            }}</span>?
                         <br>
                         <span class="text-[14px] font-black text-green-600 block mt-2">{{ pasajeroALlamar.telefono
-                        }}</span>
+                            }}</span>
                     </p>
                     <div class="flex gap-3">
                         <button @click="pasajeroALlamar = null"
